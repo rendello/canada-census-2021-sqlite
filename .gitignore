@@ -1,0 +1,5 @@
+98-401-X2021006_eng_TAB/
+*.sqlite3
+*.wal
+*.shm
+.Ds_Store
