@@ -13,7 +13,7 @@ CREATE_TABLE_AREA = """
 CREATE_TABLE_CENSUS = """
 	CREATE TABLE census (
 		dguid TEXT,
-		characteristic_id INTEGER,
+		characteristic_id TEXT,
 		tnr_sf TEXT,
 		tnr_lf TEXT,
 		data_quality_flag TEXT,
@@ -29,8 +29,8 @@ CREATE_TABLE_CENSUS = """
 		c11_rate_men_symbol TEXT,
 		c12_rate_women TEXT,
 		c12_rate_women_symbol TEXT,
-		-- FOREIGN KEY(dguid) REFERENCES area(dguid),
-		FOREIGN KEY(characteristic_id) REFERENCES characteristics(id),
+		FOREIGN KEY(dguid) REFERENCES area(dguid),
+		FOREIGN KEY(characteristic_id) REFERENCES characteristic(id),
 		PRIMARY KEY (dguid, characteristic_id)
 	) WITHOUT ROWID, STRICT;
 """
@@ -55,8 +55,19 @@ INSERT_CENSUS_VALUES = """
 		c12_rate_women,
 		c12_rate_women_symbol
 	)
+
 	VALUES
 	(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
+"""
+
+INSERT_AREA_VALUES = """
+INSERT OR IGNORE INTO area (
+	dguid,
+	alt_geo_code,
+	geo_level,
+	geo_name
+)
+VALUES (?,?,?,?);
 """
 
 CENSUS_YEAR = 0  
@@ -122,39 +133,52 @@ if __name__ == "__main__":
 		next(f) # Skip header
 
 		while True:
-			data = []
+			area_data = set()
+			census_data = []
 			for line in islice(f, BATCH_SIZE):
 				split = split_line(line)
-				data.append(
-					(
-						split[DGUID],
-						split[CHARACTERISTIC_ID],
-						split[TNR_SF],
-						split[TNR_LF],
-						split[DATA_QUALITY_FLAG],
-						split[C1_COUNT_TOTAL],
-						split[C1_COUNT_TOTAL_SYMBOL],
-						split[C2_COUNT_MEN],
-						split[C2_COUNT_MEN_SYMBOL],
-						split[C3_COUNT_WOMEN],
-						split[C3_COUNT_WOMEN_SYMBOL],
-						split[C10_RATE_TOTAL],
-						split[C10_RATE_TOTAL_SYMBOL],
-						split[C11_RATE_MEN],
-						split[C11_RATE_MEN_SYMBOL],
-						split[C12_RATE_WOMEN],
-						split[C12_RATE_WOMEN_SYMBOL]
-					)
-				)
-			if data == []:
+
+				area_data.add((
+					split[DGUID],
+					split[ALT_GEO_CODE],
+					split[GEO_LEVEL],
+					split[GEO_NAME]
+				))
+
+				census_data.append((
+					split[DGUID],
+					split[CHARACTERISTIC_ID],
+					split[TNR_SF],
+					split[TNR_LF],
+					split[DATA_QUALITY_FLAG],
+					split[C1_COUNT_TOTAL],
+					split[C1_COUNT_TOTAL_SYMBOL],
+					split[C2_COUNT_MEN],
+					split[C2_COUNT_MEN_SYMBOL],
+					split[C3_COUNT_WOMEN],
+					split[C3_COUNT_WOMEN_SYMBOL],
+					split[C10_RATE_TOTAL],
+					split[C10_RATE_TOTAL_SYMBOL],
+					split[C11_RATE_MEN],
+					split[C11_RATE_MEN_SYMBOL],
+					split[C12_RATE_WOMEN],
+					split[C12_RATE_WOMEN_SYMBOL]
+				))
+
+			if census_data == []:
+				assert_eq(area_data, set())
 				break
 
-			cur.executemany(INSERT_CENSUS_VALUES, data)
+			cur.executemany(INSERT_AREA_VALUES, list(area_data))
+			cur.executemany(INSERT_CENSUS_VALUES, census_data)
 			con.commit()
-			data = []
+			area_data = []
+			census_data = []
 
 	cur.execute("PRAGMA OPTIMIZE;")
 	con.close()
+
+
 
 
 """

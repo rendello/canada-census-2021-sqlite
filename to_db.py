@@ -64,12 +64,12 @@ if __name__ == "__main__":
 	cur.execute("PRAGMA journal_mode = WAL;")
 	cur.execute("PRAGMA foreign_keys = TRUE;")
 	cur.execute(
-		"""CREATE TABLE characteristics (
-			id INTEGER PRIMARY KEY,
+		"""CREATE TABLE characteristic (
+			id TEXT PRIMARY KEY,
 			description TEXT NOT NULL UNIQUE,
-			parent_id INTEGER
+			parent_id TEXT
 		) WITHOUT ROWID, STRICT;""")
-	cur.executemany("INSERT INTO characteristics VALUES (?, ?, ?)", l)
+	cur.executemany("INSERT INTO characteristic VALUES (?, ?, ?)", l)
 	con.commit()
 	cur.execute("PRAGMA OPTIMIZE;")
 
