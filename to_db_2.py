@@ -1,3 +1,5 @@
+
+import sys
 import sqlite3
 from itertools import islice
 
@@ -19,14 +21,42 @@ POPULATE_TABLE_SYMBOL = """
 		('rE', 'Revised. Use with caution.');
 """
 
+CREATE_TABLE_GEO_LEVEL = """
+	CREATE TABLE geo_level (
+		id INTEGER PRIMARY KEY,
+		name TEXT UNIQUE NOT NULL
+	) STRICT;
+"""
+
+POPULATE_TABLE_GEO_LEVEL = """
+	INSERT INTO geo_level(name) VALUES
+		('Country'),
+		('Territory'),
+		('Census division'),
+		('Census subdivision'),
+		('Dissemination area');
+"""
+
 CREATE_TABLE_AREA = """
 	CREATE TABLE area (
 		id INTEGER PRIMARY KEY,
 		dguid TEXT NOT NULL UNIQUE,
 		alt_geo_code TEXT NOT NULL UNIQUE,
-		geo_level TEXT NOT NULL,
-		geo_name TEXT NOT NULL
+		geo_level_id INTEGER NOT NULL,
+		geo_name TEXT NOT NULL,
+
+		FOREIGN KEY (geo_level_id) REFERENCES geo_level(id)
 	) STRICT;
+"""
+
+INSERT_AREA_VALUES = """
+	INSERT OR IGNORE INTO area (
+		dguid,
+		alt_geo_code,
+		geo_level_id,
+		geo_name
+	)
+	VALUES (?,?,?,?);
 """
 
 CREATE_TABLE_CENSUS = """
@@ -81,14 +111,35 @@ INSERT_CENSUS_VALUES = """
 	(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);
 """
 
-INSERT_AREA_VALUES = """
-	INSERT OR IGNORE INTO area (
-		dguid,
-		alt_geo_code,
-		geo_level,
-		geo_name
-	)
-	VALUES (?,?,?,?);
+CREATE_VIEW_CVIEW = """
+	CREATE VIEW cview AS
+	SELECT
+	    dguid,
+	    alt_geo_code,
+	    geo_level.name AS geo_level_name,
+	    geo_name,
+	    characteristic_id,
+	    description AS characteristic_description,
+	    parent_id AS characteristic_parent_id,
+	    tnr_sf,
+	    tnr_lf,
+	    data_quality_flag,
+	    c1_count_total,
+	    c1_count_total_symbol,
+	    c2_count_men,
+	    c2_count_men_symbol,
+	    c3_count_women,
+	    c3_count_women_symbol,
+	    c10_rate_total,
+	    c10_rate_total_symbol,
+	    c11_rate_men,
+	    c11_rate_men_symbol,
+	    c12_rate_women,
+	    c12_rate_women_symbol
+	FROM census 
+	JOIN characteristic ON census.characteristic_id = characteristic.id
+	JOIN area ON census.area_id = area.id
+	JOIN geo_level ON area.geo_level_id;
 """
 
 CENSUS_YEAR = 0
@@ -115,7 +166,7 @@ C11_RATE_MEN_SYMBOL = 20
 C12_RATE_WOMEN = 21
 C12_RATE_WOMEN_SYMBOL = 22
 
-BATCH_SIZE = 1
+BATCH_SIZE = 1000
 
 PATHS = [
 	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Atlantic.TAB",
@@ -127,10 +178,9 @@ PATHS = [
 ]
 
 def assert_eq(a, b) -> None:
-	try:
-		assert a == b
+	try: assert a == b
 	except AssertionError as e:
-		print(f"ASSERT EQUAL FAILURE: {a} != {b}")
+		print(f"ASSERT EQUAL FAILURE: {a} != {b}", file=sys.stderr)
 		raise e
 
 def latin1_to_utf8(s: str) -> str:
@@ -151,32 +201,35 @@ def dguid_to_area_id(dguid: str,  cur) -> int|None:
 	if res: return res[0]
 	else: return None
 
-def symbol_to_symbol_id(symbol: str, cur) -> int|None:
-	symbol = symbol.strip() # symbols sometimes have whitespace.
-	if symbol == "": return None
-	cur.execute("SELECT id FROM symbol WHERE representation = (?);", [symbol])
-	try:
-		return cur.fetchone()[0]
-	except TypeError as e:
-		print(f'"{symbol}"')
-		raise e
-	
+def geo_level_name_to_id(geo_level_name: str) -> int|None:
+	cur.execute("SELECT id FROM geo_level WHERE name = (?)", [geo_level_name])
+	res = cur.fetchone()
+	if res: return res[0]
+	else: return None
+
 
 if __name__ == "__main__":
 	con = sqlite3.connect("data.sqlite3")
 	cur = con.cursor()
 	cur.execute("PRAGMA foreign_keys = TRUE;")
-	con.execute("PRAGMA synchronous = OFF")
-	con.execute("PRAGMA journal_mode = MEMORY")
-	con.execute("PRAGMA temp_store = MEMORY")
-	con.execute("PRAGMA page_size = 65536")
-	con.execute("PRAGMA locking_mode = EXCLUSIVE")
+	cur.execute("PRAGMA synchronous = OFF")
+	cur.execute("PRAGMA journal_mode = MEMORY")
+	cur.execute("PRAGMA temp_store = MEMORY")
+	cur.execute("PRAGMA page_size = 65536")
+	cur.execute("PRAGMA locking_mode = EXCLUSIVE")
 
 	cur.execute(CREATE_TABLE_SYMBOL)
 	cur.execute(POPULATE_TABLE_SYMBOL)
 
+	cur.execute(CREATE_TABLE_GEO_LEVEL)
+	cur.execute(POPULATE_TABLE_GEO_LEVEL)
+
 	cur.execute(CREATE_TABLE_AREA)
 	cur.execute(CREATE_TABLE_CENSUS)
+
+	cur.execute(CREATE_VIEW_CVIEW)
+
+	cur.execute("PRAGMA OPTIMIZE;")
 
 	for path in PATHS:
 		print(f"Processing `{path}`.")
@@ -188,14 +241,15 @@ if __name__ == "__main__":
 				for line in islice(f, BATCH_SIZE):
 					p_line = latin1_to_utf8(line).rstrip("\n")
 					split = split_line(p_line)
-					# print(split)
 
 					maybe_area_id = dguid_to_area_id(split[DGUID], cur)
 					if not maybe_area_id:
+						geo_level_id = geo_level_name_to_id(split[GEO_LEVEL])
+
 						cur.execute(INSERT_AREA_VALUES, (
 							split[DGUID],
 							split[ALT_GEO_CODE],
-							split[GEO_LEVEL],
+							geo_level_id,
 							split[GEO_NAME]
 						))
 						area_id = dguid_to_area_id(split[DGUID], cur)
@@ -237,26 +291,3 @@ if __name__ == "__main__":
 
 	cur.execute("PRAGMA OPTIMIZE;")
 	con.close()
-
-
-
-
-"""
-		dguid,
-		characteristic_id,
-		tnr_sf,
-		tnr_lf,
-		data_quality_flag,
-		c1_count_total,
-		c1_count_total_symbol,
-		c2_count_men,
-		c2_count_men_symbol,
-		c3_count_women,
-		c3_count_women_symbol,
-		c10_rate_total,
-		c10_rate_total_symbol,
-		c11_rate_men,
-		c11_rate_men_symbol,
-		c12_rate_women,
-		c12_rate_women_symbol
-"""
