@@ -3,3 +3,4 @@
 *.wal
 *.shm
 .Ds_Store
+*.zst

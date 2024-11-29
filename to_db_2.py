@@ -3,8 +3,7 @@ from itertools import islice
 
 CREATE_TABLE_SYMBOL = """
 	CREATE TABLE symbol (
-		id INTEGER PRIMARY KEY,
-		representation TEXT UNIQUE NOT NULL,
+		representation TEXT PRIMARY KEY,
 		description_en TEXT UNIQUE NOT NULL
 	) STRICT;
 """
@@ -38,29 +37,22 @@ CREATE_TABLE_CENSUS = """
 		tnr_lf REAL NOT NULL,
 		data_quality_flag TEXT NOT NULL,
 		c1_count_total REAL,
-		c1_count_total_symbol INTEGER,
+		c1_count_total_symbol TEXT,
 		c2_count_men REAL,
-		c2_count_men_symbol INTEGER,
+		c2_count_men_symbol TEXT,
 		c3_count_women REAL,
-		c3_count_women_symbol INTEGER,
+		c3_count_women_symbol TEXT,
 		c10_rate_total REAL,
-		c10_rate_total_symbol INTEGER,
+		c10_rate_total_symbol TEXT,
 		c11_rate_men REAL,
-		c11_rate_men_symbol INTEGER,
+		c11_rate_men_symbol TEXT,
 		c12_rate_women REAL,
-		c12_rate_women_symbol INTEGER,
+		c12_rate_women_symbol TEXT,
 
 		PRIMARY KEY (area_id, characteristic_id),
 
 		FOREIGN KEY(area_id) REFERENCES area(id),
-		FOREIGN KEY(characteristic_id) REFERENCES characteristic(id),
-
-		FOREIGN KEY(c1_count_total_symbol)	REFERENCES symbol(id),
-		FOREIGN KEY(c2_count_men_symbol)	REFERENCES symbol(id),
-		FOREIGN KEY(c3_count_women_symbol)	REFERENCES symbol(id),
-		FOREIGN KEY(c10_rate_total_symbol)	REFERENCES symbol(id),
-		FOREIGN KEY(c11_rate_men_symbol)	REFERENCES symbol(id),
-		FOREIGN KEY(c12_rate_women_symbol)	REFERENCES symbol(id)
+		FOREIGN KEY(characteristic_id) REFERENCES characteristic(id)
 	) WITHOUT ROWID, STRICT;
 """
 
@@ -123,14 +115,14 @@ C11_RATE_MEN_SYMBOL = 20
 C12_RATE_WOMEN = 21
 C12_RATE_WOMEN_SYMBOL = 22
 
-BATCH_SIZE = 1000
+BATCH_SIZE = 1
 
 PATHS = [
-	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Atlantic.TAB",
-	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_BritishColumbia.TAB",
-	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Ontario.TAB",
-	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Prairies.TAB",
-	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Quebec.TAB",
+	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Atlantic.TAB",
+	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_BritishColumbia.TAB",
+	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Ontario.TAB",
+	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Prairies.TAB",
+	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Quebec.TAB",
 	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Territories.TAB"
 ]
 
@@ -217,17 +209,17 @@ if __name__ == "__main__":
 						split[TNR_LF],
 						split[DATA_QUALITY_FLAG],
 						nonempty_str_or_none(split[C1_COUNT_TOTAL]),
-						symbol_to_symbol_id(split[C1_COUNT_TOTAL_SYMBOL], cur),
+						nonempty_str_or_none(split[C1_COUNT_TOTAL_SYMBOL].strip()),
 						nonempty_str_or_none(split[C2_COUNT_MEN]),
-						symbol_to_symbol_id(split[C2_COUNT_MEN_SYMBOL], cur),
+						nonempty_str_or_none(split[C2_COUNT_MEN_SYMBOL].strip()),
 						nonempty_str_or_none(split[C3_COUNT_WOMEN]),
-						symbol_to_symbol_id(split[C3_COUNT_WOMEN_SYMBOL], cur),
+						nonempty_str_or_none(split[C3_COUNT_WOMEN_SYMBOL].strip()),
 						nonempty_str_or_none(split[C10_RATE_TOTAL]),
-						symbol_to_symbol_id(split[C10_RATE_TOTAL_SYMBOL], cur),
+						nonempty_str_or_none(split[C10_RATE_TOTAL_SYMBOL].strip()),
 						nonempty_str_or_none(split[C11_RATE_MEN]),
-						symbol_to_symbol_id(split[C11_RATE_MEN_SYMBOL], cur),
+						nonempty_str_or_none(split[C11_RATE_MEN_SYMBOL].strip()),
 						nonempty_str_or_none(split[C12_RATE_WOMEN]),
-						symbol_to_symbol_id(split[C12_RATE_WOMEN_SYMBOL], cur)
+						nonempty_str_or_none(split[C12_RATE_WOMEN_SYMBOL].strip())
 					))
 
 				if census_data == []:
