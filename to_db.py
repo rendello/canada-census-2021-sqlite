@@ -65,9 +65,9 @@ if __name__ == "__main__":
 	cur.execute("PRAGMA foreign_keys = TRUE;")
 	cur.execute(
 		"""CREATE TABLE characteristic (
-			id TEXT PRIMARY KEY,
+			id INTEGER PRIMARY KEY,
 			description TEXT NOT NULL UNIQUE,
-			parent_id TEXT
+			parent_id INTEGER
 		) WITHOUT ROWID, STRICT;""")
 	cur.executemany("INSERT INTO characteristic VALUES (?, ?, ?)", l)
 	con.commit()
