@@ -79,3 +79,17 @@ AND characteristic_id = '390'
 -- AND characteristic_id = '390'
 -- ;
 """
+
+
+"""
+WITH RECURSIVE ac AS (
+	SELECT id, full_description, 1 depth, partial_description AS path
+	FROM characteristics WHERE parent IS NULL
+	UNION ALL
+	SELECT characteristics.id, characteristics.full_description, depth + 1, concat(path, '; ', characteristics.partial_description)
+	FROM ac
+		INNER JOIN characteristics ON ac.id = characteristics.parent
+)
+
+SELECT full_description, path FROM ac where full_description == path;
+"""
