@@ -1,25 +1,4 @@
 
-import sqlite3
-
-DB_PATH = "data copy.sqlite3"
-
-con = sqlite3.connect(DB_PATH)
-cursor = con.cursor()
-cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-
-queries = []
-for table in cursor.fetchall():
-# for table in [("sqlite_stat1",)]:
-	table_name = table[0]
-	cursor.execute(f"PRAGMA table_info({table_name});")
-
-	columns = [table_info[1] for table_info in cursor.fetchall()]
-
-
-	queries.append(" UNION ALL ".join([f"SELECT {column} AS value FROM {table_name}" for column in columns]))
-	# print(f"{s} UNION ")
-print(" UNION ALL ".join(queries) + ";")
-
 
 """
 CREATE VIEW cv AS

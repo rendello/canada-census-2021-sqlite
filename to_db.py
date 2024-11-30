@@ -154,7 +154,7 @@ CREATE_VIEW_CVIEW = """
 	FROM census 
 	JOIN characteristic ON census.characteristic_id = characteristic.id
 	JOIN area ON census.area_id = area.id
-	JOIN geo_level ON area.geo_level_id;
+	JOIN geo_level ON area.geo_level_id = geo_level.id;
 """
 
 CENSUS_YEAR = 0
@@ -375,7 +375,6 @@ def create_db(db_path: str):
 				con.commit()
 				census_data = []
 
-	cur.execute("PRAGMA OPTIMIZE;")
 	con.close()
 
 

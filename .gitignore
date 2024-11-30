@@ -4,3 +4,5 @@
 *.shm
 .Ds_Store
 *.zst
+.mypy_cache
+*.png
