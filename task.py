@@ -85,6 +85,3 @@ def create_release(version: str):
 			f.write(s)
 	else:
 		print("[RELEASE NOTES EXIST; SKIPPING]")
-
-
-create_release("1.0.0-alpha")
