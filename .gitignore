@@ -6,3 +6,8 @@
 *.zst
 .mypy_cache
 *.png
+
+__pycache__
+
+staging/
+release/

@@ -1,4 +1,4 @@
-# Canada Census 2021 SQLite – Version `[VERSION]`
+# Canada Census 2021 SQLite – Version `[!!VERSION]`
 
 An unofficial consolidation of the Canada *Census Profile, 2021 Census of Population* into a SQLite database file.
 
@@ -6,17 +6,8 @@ The official downloads of the census profile are offered split into multiple mul
 
 The SQLite database allows direct querying, and does not require the entire database to be loaded into memory at once.
 
----
-
-The canonical Census Profile is offered by the Statistics Canada website in [English](https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/download-telecharger.cfm) and [French](https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/download-telecharger.cfm?Lang=F) in CSV, TAB, and IVT formats for 35 sets of geographic levels, with or without confidence intervals. Of the $\( 2 \times 35 \times 3 \times 2 = 420 \)$ download options, this consolidation is based on:
-
-- [English; No confidence intervals] `Canada, provinces, territories, census divisions (CDs), census subdivisions (CSDs) and dissemination areas (DAs)` [`TAB`]
-
-The database is the *consolidation* of the six `TAB`  (tab separated values) files representing the regions `Atlantic`, `BritishColumbia`, `Ontario`, `Prairies`, `Quebec`, and `Territories` offered by the aforementioned download.  It is not a *consolidation* of *all data* offered by the Census Profile, as French data, confidence intervals, and the geographic levels of `CMA`, `CA`, `CT`, `ER`, `POPCTR`, `FED`, `DPL`, `ADA`, `FSA`, `Dissolved CSD`, and `HR` are not included in the current dataset.
-
----
-
-Querying can be done on the view `cview`, which provides basically the same interface as the text files:
+## Querying
+Querying can be done against the view `cview`, which provides basically the same interface as the StatCan files:
 
 $$
 \begin{aligned}
@@ -50,23 +41,33 @@ Empty cells in the TAB files are converted to `NULL`s in the database. Counts ar
 
 Internally, the database follows this schema:
 
+[!!! Put the picture here !!!]  
+[!!! Put the picture here !!!]  
+[!!! Put the picture here !!!]  
+[!!! Put the picture here !!!]  
+[!!! Put the picture here !!!]  
 [!!! Put the picture here !!!]
 
----
+## Included data
+The canonical Census Profile is offered by the Statistics Canada website in [English](https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/download-telecharger.cfm) and [French](https://www12.statcan.gc.ca/census-recensement/2021/dp-pd/prof/details/download-telecharger.cfm?Lang=F) in CSV, TAB, and IVT formats for 35 sets of geographic levels, with or without confidence intervals. Of the $\( 2 \times 35 \times 3 \times 2 = 420 \)$ download options, this consolidation is based on:
 
-## Download info:
+- [English; No confidence intervals] `Canada, provinces, territories, census divisions (CDs), census subdivisions (CSDs) and dissemination areas (DAs)` [`TAB`]
+
+The database is the *consolidation* of the six `TAB`  (tab separated values) files representing the regions `Atlantic`, `BritishColumbia`, `Ontario`, `Prairies`, `Quebec`, and `Territories` offered by the aforementioned download.  It is not a *consolidation* of *all data* offered by the Census Profile, as French data, confidence intervals, and the geographic levels of `CMA`, `CA`, `CT`, `ER`, `POPCTR`, `FED`, `DPL`, `ADA`, `FSA`, `Dissolved CSD`, and `HR` are not included in the current dataset.
+
+## Download info
 
 ### Version
-- `[VERSION]`
+- `[!!VERSION]`
 
 ### Compressed
+- Format: `.zst` [ZStandard](https://github.com/facebook/zstd/releases) compressed file*;
+- Size: `[!!COMPRESSED_SIZE]`;
+- `SHA256` checksum: `[!!COMPRESSED_CHECKSUM]`.
 
-- Format: `.zst` [ZStandard](https://github.com/facebook/zstd/releases) compressed file (Less common file format but very good compression ratio);
-- Size: [COMPRESSED_SIZE];
-- `SHA256` checksum: [COMPRESSED_CHECKSUM].
+\* This lesser-known file format is used for its large file support and extreme compression ratio. See link above for the ZSTD decompression tool.
 
 ### Decompressed
-
-- Format: `.sqlite3` [SQLite](https://www.sqlite.org/);
-- Size: [DECOMPRESSED_SIZE];
-- `SHA256` checksum: [DECOMPRESSED_CHECKSUM].
+- Format: `.sqlite3` [SQLite](https://www.sqlite.org/) database file;
+- Size: `[!!DECOMPRESSED_SIZE]`;
+- `SHA256` checksum: `[!!DECOMPRESSED_CHECKSUM]`.
