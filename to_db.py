@@ -184,11 +184,11 @@ C12_RATE_WOMEN_SYMBOL = 22
 BATCH_SIZE = 1000
 
 PATHS = [
-	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Atlantic.TAB",
-	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_BritishColumbia.TAB",
-	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Ontario.TAB",
-	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Prairies.TAB",
-	# "98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Quebec.TAB",
+	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Atlantic.TAB",
+	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_BritishColumbia.TAB",
+	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Ontario.TAB",
+	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Prairies.TAB",
+	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Quebec.TAB",
 	"98-401-X2021006_eng_TAB/98-401-X2021006_English_TAB_data_Territories.TAB"
 ]
 

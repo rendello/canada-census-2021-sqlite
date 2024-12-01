@@ -54,7 +54,7 @@ def create_release(version: str):
 		compressed_staging_path = staging / COMPRESSED_NAME
 		try:
 			subprocess.check_call(
-				["zstd", str(db_path), "--ultra", "-3", "--long=windowLog", "-o", str(compressed_staging_path)]
+				["zstd", str(db_path), "--ultra", "-22", "--long=windowLog", "-o", str(compressed_staging_path)]
 			)
 		except subprocess.CalledProcessError as e:
 			print(e.returncode, e.output)
